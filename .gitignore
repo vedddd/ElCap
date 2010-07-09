@@ -1,0 +1,8 @@
+*.*~
+*.cxx
+ui_*.h
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+src/elcap
