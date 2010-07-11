@@ -23,7 +23,7 @@ void MainWindow::requestFinished(int id, bool error) {
   QImage image;
   
   image.loadFromData(buffer->buffer(), "JPEG");
-  QPixmap pixmap = QPixmap::fromImage(image.scaledToWidth (640));
+  QPixmap pixmap = QPixmap::fromImage(image);//.scaledToWidth (640));
   if(!pixItem) 
     pixItem = view->scene()->addPixmap(pixmap);
   else
