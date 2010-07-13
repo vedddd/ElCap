@@ -38,6 +38,7 @@ void MainWindow::init() {
   }
   isRunning = true;
   readSettingTimer->start(500);
+ qDebug() << "ff" << QImageReader::supportedImageFormats ();
 }
 
 MainWindow::~MainWindow() {
@@ -137,13 +138,13 @@ void MainWindow::requestFinished(int id, bool error) {
 
   QImage image;
   
-  image.loadFromData(buffer->buffer(), "JPEG");
+  image.loadFromData(buffer->buffer(), "JPG");
   QPixmap pixmap = QPixmap::fromImage(image);//.scaledToWidth (640));
   if(!pixItem) 
     pixItem = view->scene()->addPixmap(pixmap);
   else
     pixItem->setPixmap(pixmap);
-
+  //qDebug() << "image done" << image.width();
   getImage();
 }
 

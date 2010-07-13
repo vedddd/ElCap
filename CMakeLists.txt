@@ -5,9 +5,9 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-find_package(Boost 1.40 REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
+#find_package(Boost 1.40 REQUIRED)
+#include_directories(${Boost_INCLUDE_DIRS})
+#link_directories(${Boost_LIBRARY_DIRS})
 
 include(${QT_USE_FILE})
 

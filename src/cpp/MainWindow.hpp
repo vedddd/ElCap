@@ -2,7 +2,6 @@
 #define MAINWINDOW_HPP
 
 #include <QtGui>
-#include <boost/shared_ptr.hpp>
 #include <QBuffer>
 #include <QtNetwork>
 #include "../ui_MainWindow.h"
