@@ -20,12 +20,17 @@ protected:
   QVariantMap parseSettings(const QByteArray& data);
   QVariantMap readSettings();
   void setDcm(int dcm);
+  void setParam(const QString& param, const QVariant& value);
 private Q_SLOTS:
   void requestFinished(int id, bool error);
   void readSettingTimeout();
   void on_cbLiveImageSize_currentIndexChanged(int index);
   void on_pbAcquire_clicked(bool cheked);
+  void on_cbAutoExp_stateChanged(int state);
+  void on_dsbExpos_valueChanged(double d);
+  void on_hsExpos_valueChanged(int value);
 private:
+  QString host; // camera host
   bool isRunning;
   QHttp* http;
   QBuffer* buffer;

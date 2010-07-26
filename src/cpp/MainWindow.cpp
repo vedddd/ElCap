@@ -6,6 +6,7 @@
 MainWindow::MainWindow(): isRunning(false), http(new QHttp), buffer(new QBuffer),
 			  imgReqId(-1), pixItem(0), view(0) {
 
+  host = "192.168.0.9";
   ui.setupUi(this);
 
   readSettingTimer = new QTimer(this);
@@ -15,15 +16,13 @@ MainWindow::MainWindow(): isRunning(false), http(new QHttp), buffer(new QBuffer)
 
   view = new QGraphicsView(new QGraphicsScene, this);
   setCentralWidget(view);
-  http->setHost("192.168.0.9", 8081);
+  http->setHost(host, 8081);
   connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(requestFinished(int, bool)));
 
   init();
 }
 
 void MainWindow::init() {
-
-  setDcm(1);
 
   QVariantMap settings = readSettings();
   qDebug() << settings;
@@ -61,7 +60,7 @@ QVariantMap MainWindow::parseSettings(const QByteArray& data) {
 
 QVariantMap MainWindow::readSettings() {
 
-  QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl("http://192.168.0.9/elcap.php?status=1")));
+  QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl("http://" + host + "/var/elcap.php?status=1")));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   QVariantMap settings = parseSettings(reply->readAll());
   delete reply;
@@ -94,20 +93,41 @@ void MainWindow::on_pbAcquire_clicked(bool cheked) {
   qDebug() << "pbAcquire_clicked";
 }
 
+void MainWindow::on_cbAutoExp_stateChanged(int state) {
+  setParam("autoexp", state == Qt::Unchecked ? 0 : 1);
+}
+
+void MainWindow::on_dsbExpos_valueChanged(double d) {
+  //  setParam("autoexp", state == Qt::Unchecked ? 0 : 1);
+}
+
+void MainWindow::on_hsExpos_valueChanged(int value) {
+  if(ui.cbAutoExp->isChecked()) return;
+  setParam("expos", value);
+}
+
+
+void MainWindow::setParam(const QString& param, const QVariant& value) {
+  QString url = "http://" + host + "/var/elcap.php?" + param + "=" + value.toString();
+  QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
+  while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
+  delete reply;
+}
+
 void MainWindow::setDcm(int dcm) {
-  QString url = "http://192.168.0.9/elcap.php?dcm_hor=" + QString::number(dcm) + "&dcm_vert=" + QString::number(dcm);
+  QString url = "http://" + host + "/var/elcap.php?dcm_hor=" + QString::number(dcm) + "&dcm_vert=" + QString::number(dcm);
   QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   delete reply;
 }
 
 QByteArray MainWindow::getImageData() {
-  QString url = "http://192.168.0.9:8081/last/wait/torp/wait/next/save";
+  QString url = "http://" + host + ":8081/last/wait";///torp/wait/next/save";
   QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   delete reply;
 
-  url = "http://192.168.0.9:8081/img";
+  url = "http://" + host + ":8081/img";
   reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished()) QCoreApplication::processEvents();
   QByteArray result = reply->readAll();
@@ -119,10 +139,9 @@ void MainWindow::readSettingTimeout() {
   if(! isRunning) return;
   if (imgReqId == -1) getImage();
 
-  /*
-  settingsBuffer->reset();
-  readSettingReqId = httpSettings->get("/var/elcap.php?status=1", settingsBuffer);
-  */
+  QVariantMap settings = readSettings();
+  ui.cbAutoExp->setChecked(settings["autoexp"] == 1);
+  ui.hsExpos->setValue(settings["expos"].toInt());
 }
 
 void MainWindow::getImage() {

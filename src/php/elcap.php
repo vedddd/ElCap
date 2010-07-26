@@ -26,23 +26,23 @@ if($status != null) { #get the camera status
   $sensor_height = elphel_get_P_value(ELPHEL_SENSOR_HEIGHT);
   echo "sensor_height=$sensor_height\n";
   
-# don't work
-#  $exp = elphel_get_P_value(ELPHEL_AUTOEXP_EXP);
-#  echo "exp=$exp\n";
+  $expos = elphel_get_P_value(ELPHEL_EXPOS);
+  echo "expos=$expos\n";
  }
  else {
    $autoexp = $_GET['autoexp'];
-   if($autoexp != null) elphel_set_P_value(ELPHEL_AUTOEXP_ON, $autoexp);
+   if($autoexp != null) elphel_set_P_value(ELPHEL_AUTOEXP_ON, $autoexp); // on/off autoexp
 
    $dcm_hor = $_GET['dcm_hor'];
    if($dcm_hor != null) elphel_set_P_value(ELPHEL_DCM_HOR, $dcm_hor);
 
    $dcm_vert = $_GET['dcm_vert'];
    if($dcm_vert != null) elphel_set_P_value(ELPHEL_DCM_VERT, $dcm_vert);
-# don't work
-#   $exp = $_GET['exp'];
-#   if($exp != null) elphel_set_P_value(ELPHEL_AUTOEXP_EXP, $exp);
 
+   $expos = $_GET['expos'];
+   if($expos != null) elphel_set_P_value(ELPHEL_EXPOS, $expos);
+
+   elphel_program_sensor(1);
    echo "done=1\n";
  }
 ?>
