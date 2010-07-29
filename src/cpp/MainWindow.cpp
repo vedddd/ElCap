@@ -27,8 +27,8 @@ void MainWindow::init() {
   QVariantMap settings = readSettings();
   qDebug() << settings;
 
-  int iWidth = settings["actual_width"].toInt();
-  int iHeight = settings["actual_height"].toInt();
+  int iWidth = settings["sensor_width"].toInt();
+  int iHeight = settings["sensor_height"].toInt();
 
   for(int i = 1; iHeight / i > 319; ++i) {
     int h = iHeight / i;
@@ -37,7 +37,7 @@ void MainWindow::init() {
   }
   isRunning = true;
   readSettingTimer->start(500);
- qDebug() << "ff" << QImageReader::supportedImageFormats ();
+  //  qDebug() << "ff" << QImageReader::supportedImageFormats ();
 }
 
 MainWindow::~MainWindow() {
@@ -94,7 +94,7 @@ void MainWindow::on_pbAcquire_clicked(bool cheked) {
 }
 
 void MainWindow::on_cbAutoExp_stateChanged(int state) {
-  setParam("autoexp", state == Qt::Unchecked ? 0 : 1);
+  setParam("autoexp_on", state == Qt::Unchecked ? 0 : 1);
 }
 
 void MainWindow::on_dsbExpos_valueChanged(double d) {
@@ -140,8 +140,9 @@ void MainWindow::readSettingTimeout() {
   if (imgReqId == -1) getImage();
 
   QVariantMap settings = readSettings();
-  ui.cbAutoExp->setChecked(settings["autoexp"] == 1);
-  ui.hsExpos->setValue(settings["expos"].toInt());
+  ui.cbAutoExp->setChecked(settings["autoexp_on"] == 1);
+  //  if(ui.cbAutoExp->isChecked()) 
+  //  ui.hsExpos->setValue(settings["expos"].toInt());
 }
 
 void MainWindow::getImage() {
@@ -163,6 +164,7 @@ void MainWindow::requestFinished(int id, bool error) {
     pixItem = view->scene()->addPixmap(pixmap);
   else
     pixItem->setPixmap(pixmap);
+  pixItem->setOffset(-pixmap.width() / 2, -pixmap.height() / 2);
   //qDebug() << "image done" << image.width();
   getImage();
 }
