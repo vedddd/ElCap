@@ -60,7 +60,7 @@ QVariantMap MainWindow::parseSettings(const QByteArray& data) {
 
 QVariantMap MainWindow::readSettings() {
 
-  QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl("http://" + host + "/var/elcap.php?status=1")));
+  QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl("http://" + host + "/elcap.php?status=1")));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   QVariantMap settings = parseSettings(reply->readAll());
   delete reply;
