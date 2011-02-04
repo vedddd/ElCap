@@ -14,8 +14,8 @@ MainWindow::MainWindow(): isRunning(false), http(new QHttp), buffer(new QBuffer)
 
   netManager = new QNetworkAccessManager(this);
 
-  view = new QGraphicsView(new QGraphicsScene, this);
-  setCentralWidget(view);
+  view = new QGraphicsView(new QGraphicsScene, ui.fImage);
+  //ui.fImage->addWidget(view);
   http->setHost(host, 8081);
   connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(requestFinished(int, bool)));
 
@@ -91,6 +91,12 @@ void MainWindow::on_pbAcquire_clicked(bool cheked) {
   setDcm(dcm);
   isRunning = true;
   qDebug() << "pbAcquire_clicked";
+}
+
+//test
+void MainWindow::on_actionSettings_triggered(bool checked)
+{
+  QCoreApplication::exit();
 }
 
 void MainWindow::on_cbAutoExp_stateChanged(int state) {

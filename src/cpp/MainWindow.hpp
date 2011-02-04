@@ -29,6 +29,9 @@ private Q_SLOTS:
   void on_cbAutoExp_stateChanged(int state);
   void on_dsbExpos_valueChanged(double d);
   void on_hsExpos_valueChanged(int value);
+  //my test
+  void on_actionSettings_triggered(bool checked);
+  
 private:
   QString host; // camera host
   bool isRunning;
