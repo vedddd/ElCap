@@ -2,11 +2,19 @@
 #include <QtGui>
 #include <QtNetwork>
 #include <QtDebug>
- 
+#include <QFileDialog>
+#include <QDir>
+#include <QSettings>
+#include <QStackedLayout>
+#include "SettingsDialog.hpp"
+
+
 MainWindow::MainWindow(): isRunning(false), http(new QHttp), buffer(new QBuffer),
 			  imgReqId(-1), pixItem(0), view(0) {
 
-  host = "192.168.0.9";
+  QSettings settings;
+  host = settings.value("host", "192.168.0.9").toString();
+  
   ui.setupUi(this);
 
   readSettingTimer = new QTimer(this);
@@ -14,8 +22,11 @@ MainWindow::MainWindow(): isRunning(false), http(new QHttp), buffer(new QBuffer)
 
   netManager = new QNetworkAccessManager(this);
 
-  view = new QGraphicsView(new QGraphicsScene, ui.fImage);
+  QStackedLayout* layout = new QStackedLayout(ui.fImage);
+  view = new QGraphicsView(new QGraphicsScene);
+  layout->addWidget(view);
   //ui.fImage->addWidget(view);
+  
   http->setHost(host, 8081);
   connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(requestFinished(int, bool)));
 
@@ -38,6 +49,19 @@ void MainWindow::init() {
   isRunning = true;
   readSettingTimer->start(500);
   //  qDebug() << "ff" << QImageReader::supportedImageFormats ();
+  QSettings app_settings;
+   
+  // add file path
+  ui.leFilePath->setText(
+      app_settings.value("lastPath", QDir::home().absolutePath()).toString()    
+      );
+  
+  // add extension
+  //ui.comboBoxExtension->addItem(".png");
+  //ui.comboBoxExtension->addItem(".jp2");
+  ui.comboBoxExtension->addItem(".jpg");
+  //ui.comboBoxExtension->addItem(".bmp");
+ 
 }
 
 MainWindow::~MainWindow() {
@@ -80,7 +104,8 @@ void MainWindow::on_pbAcquire_clicked(bool cheked) {
   isRunning = false;
   setDcm(1);
   for(int i=1;true; ++i) {
-    QString fn = QString::number(i) + ".jpg";
+    QString fn = ui.leFilePath->text() + QDir::separator() + ui.leFileName->text()
+		  + QString::number(i) + ui.comboBoxExtension->currentText();
     if(QFile::exists(fn)) continue;
     QFile file(fn);
     file.open(QIODevice::WriteOnly);
@@ -93,40 +118,67 @@ void MainWindow::on_pbAcquire_clicked(bool cheked) {
   qDebug() << "pbAcquire_clicked";
 }
 
-//test
-void MainWindow::on_actionSettings_triggered(bool checked)
+// file path
+void MainWindow::on_bSelectFilePath_clicked(bool checked)
 {
-  QCoreApplication::exit();
+  QString qdirectoryName = QFileDialog::getExistingDirectory(this, "Select files path", ".");
+  QString directoryName = qdirectoryName;
+  if(qdirectoryName=="") directoryName = ui.leFilePath->text();
+  ui.leFilePath->setText(directoryName);
+  
+  // save file path
+  QSettings settings;
+  settings.setValue("lastPath", directoryName);    
 }
 
+// settings
+void MainWindow::on_bSettings_clicked(bool checked)
+{
+  SettingsDialog dialog;
+  dialog.setIpAddress(host);
+  if (dialog.exec()) {
+    host = dialog.ipAddress();
+    QSettings settings;
+    host = dialog.ipAddress();
+    settings.setValue("host", host);
+    http->setHost(host, 8081);
+    qDebug() << dialog.ipAddress();
+  }
+}
+
+// auto exposition
 void MainWindow::on_cbAutoExp_stateChanged(int state) {
   setParam("autoexp_on", state == Qt::Unchecked ? 0 : 1);
 }
 
+// set exposition
 void MainWindow::on_dsbExpos_valueChanged(double d) {
-  //  setParam("autoexp", state == Qt::Unchecked ? 0 : 1);
+  //setParam("autoexp", state == Qt::Unchecked ? 0 : 1);
 }
 
+// slider exposition
 void MainWindow::on_hsExpos_valueChanged(int value) {
   if(ui.cbAutoExp->isChecked()) return;
   setParam("expos", value);
 }
 
-
+//
 void MainWindow::setParam(const QString& param, const QVariant& value) {
-  QString url = "http://" + host + "/var/elcap.php?" + param + "=" + value.toString();
+  QString url = "http://" + host + "/elcap.php?" + param + "=" + value.toString();
   QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   delete reply;
 }
 
+// image divider
 void MainWindow::setDcm(int dcm) {
-  QString url = "http://" + host + "/var/elcap.php?dcm_hor=" + QString::number(dcm) + "&dcm_vert=" + QString::number(dcm);
+  QString url = "http://" + host + "/elcap.php?dcm_hor=" + QString::number(dcm) + "&dcm_vert=" + QString::number(dcm);
   QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished() && reply->error() == QNetworkReply::NoError) QCoreApplication::processEvents();
   delete reply;
 }
 
+//
 QByteArray MainWindow::getImageData() {
   QString url = "http://" + host + ":8081/last/wait";///torp/wait/next/save";
   QNetworkReply* reply = netManager->get(QNetworkRequest(QUrl(url)));
@@ -137,7 +189,7 @@ QByteArray MainWindow::getImageData() {
   reply = netManager->get(QNetworkRequest(QUrl(url)));
   while(!reply->isFinished()) QCoreApplication::processEvents();
   QByteArray result = reply->readAll();
-  delete reply;  
+  delete reply;
   return result;
 }
 

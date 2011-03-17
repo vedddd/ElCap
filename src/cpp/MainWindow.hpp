@@ -12,6 +12,7 @@ class MainWindow : public QMainWindow
 public:
   MainWindow();
   ~MainWindow();
+    void fileName(const char* arg1, MainWindow* arg2);
 protected:
   void closeEvent(QCloseEvent *event);
   void getImage();
@@ -29,8 +30,9 @@ private Q_SLOTS:
   void on_cbAutoExp_stateChanged(int state);
   void on_dsbExpos_valueChanged(double d);
   void on_hsExpos_valueChanged(int value);
-  //my test
-  void on_actionSettings_triggered(bool checked);
+  // test
+  void on_bSelectFilePath_clicked(bool checked);
+  void on_bSettings_clicked(bool checked);
   
 private:
   QString host; // camera host

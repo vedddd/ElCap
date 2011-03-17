@@ -9,6 +9,12 @@ int main (int argc, char *argv[])
   qDebug ("Application initialized");
 	
   QApplication app (argc, argv);
+  
+  // QSettings
+  QCoreApplication::setOrganizationName("PTRI UNN");
+  QCoreApplication::setOrganizationDomain("nifti.unn.ru");
+  QCoreApplication::setApplicationName("ElCap");
+  
   QStringList paths = QCoreApplication::libraryPaths();
   paths.push_back(QApplication::applicationDirPath());
   QCoreApplication::setLibraryPaths (paths);
@@ -18,7 +24,8 @@ int main (int argc, char *argv[])
   QCoreApplication::setApplicationName (QString::fromUtf8 ("ElCap"));   
 
   MainWindow mainwnd;
-  mainwnd.show();    
+  //mainwnd.showMaximized();
+  mainwnd.show();
   int ret = app.exec ();
   
   qDebug ("Application closed with code %d", ret);
